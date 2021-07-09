@@ -49,52 +49,6 @@ module.exports =
 /************************************************************************/
 /******/ ({
 
-/***/ 3:
-/***/ (function(__unusedmodule, exports) {
-
-"use strict";
-
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
-/*!
- * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
- *
- * Copyright (c) 2014-2017, Jon Schlinkert.
- * Released under the MIT License.
- */
-
-function isObject(o) {
-  return Object.prototype.toString.call(o) === '[object Object]';
-}
-
-function isPlainObject(o) {
-  var ctor,prot;
-
-  if (isObject(o) === false) return false;
-
-  // If has modified constructor
-  ctor = o.constructor;
-  if (ctor === undefined) return true;
-
-  // If has modified prototype
-  prot = ctor.prototype;
-  if (isObject(prot) === false) return false;
-
-  // If constructor does not have an Object-specific method
-  if (prot.hasOwnProperty('isPrototypeOf') === false) {
-    return false;
-  }
-
-  // Most likely a plain Object
-  return true;
-}
-
-exports.isPlainObject = isPlainObject;
-
-
-/***/ }),
-
 /***/ 8:
 /***/ (function(module) {
 
@@ -790,6 +744,7 @@ formatters.O = function (v) {
 // We use any as a valid input type
 /* eslint-disable @typescript-eslint/no-explicit-any */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.toCommandValue = void 0;
 /**
  * Sanitizes an input into a string so it can be passed into issueCommand safely
  * @param input input to sanitize into a string
@@ -845,14 +800,27 @@ module.exports = sortByStats;
 "use strict";
 
 // For internal use, subject to change.
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.issueCommand = void 0;
 // We use any as a valid input type
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const fs = __importStar(__webpack_require__(747));
@@ -1779,36 +1747,77 @@ exports.MixpanelGroups = MixpanelGroups;
         ? "χιλιοστό του δευτερολέπτου"
         : "χιλιοστά του δευτερολέπτου";
     },
-    decimal: ",",
+    decimal: ","
   };
 
+  var ARABIC_DIGITS = ["۰", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
+
   var LANGUAGES = {
-    ar: {
-      y: function (c) {
-        return c === 1 ? "سنة" : "سنوات";
-      },
+    af: {
+      y: "jaar",
       mo: function (c) {
-        return c === 1 ? "شهر" : "أشهر";
+        return "maand" + (c === 1 ? "" : "e");
       },
       w: function (c) {
-        return c === 1 ? "أسبوع" : "أسابيع";
+        return c === 1 ? "week" : "weke";
       },
       d: function (c) {
-        return c === 1 ? "يوم" : "أيام";
+        return c === 1 ? "dag" : "dae";
       },
       h: function (c) {
-        return c === 1 ? "ساعة" : "ساعات";
+        return c === 1 ? "uur" : "ure";
       },
       m: function (c) {
-        return c > 2 && c < 11 ? "دقائق" : "دقيقة";
+        return c === 1 ? "minuut" : "minute";
       },
       s: function (c) {
-        return c === 1 ? "ثانية" : "ثواني";
+        return "sekonde" + (c === 1 ? "" : "s");
       },
       ms: function (c) {
-        return c === 1 ? "جزء من الثانية" : "أجزاء من الثانية";
+        return "millisekonde" + (c === 1 ? "" : "s");
+      },
+      decimal: ","
+    },
+    ar: {
+      y: function (c) {
+        return ["سنة", "سنتان", "سنوات"][getArabicForm(c)];
+      },
+      mo: function (c) {
+        return ["شهر", "شهران", "أشهر"][getArabicForm(c)];
+      },
+      w: function (c) {
+        return ["أسبوع", "أسبوعين", "أسابيع"][getArabicForm(c)];
+      },
+      d: function (c) {
+        return ["يوم", "يومين", "أيام"][getArabicForm(c)];
+      },
+      h: function (c) {
+        return ["ساعة", "ساعتين", "ساعات"][getArabicForm(c)];
+      },
+      m: function (c) {
+        return ["دقيقة", "دقيقتان", "دقائق"][getArabicForm(c)];
+      },
+      s: function (c) {
+        return ["ثانية", "ثانيتان", "ثواني"][getArabicForm(c)];
+      },
+      ms: function (c) {
+        return ["جزء من الثانية", "جزآن من الثانية", "أجزاء من الثانية"][
+          getArabicForm(c)
+        ];
       },
       decimal: ",",
+      delimiter: " و ",
+      _formatCount: function (count, decimal) {
+        var replacements = assign(ARABIC_DIGITS, { ".": decimal });
+        var characters = count.toString().split("");
+        for (var i = 0; i < characters.length; i++) {
+          var character = characters[i];
+          if (has(replacements, character)) {
+            characters[i] = replacements[character];
+          }
+        }
+        return characters.join("");
+      }
     },
     bg: {
       y: function (c) {
@@ -1835,7 +1844,17 @@ exports.MixpanelGroups = MixpanelGroups;
       ms: function (c) {
         return ["милисекунди", "милисекунда", "милисекунди"][getSlavicForm(c)];
       },
-      decimal: ",",
+      decimal: ","
+    },
+    bn: {
+      y: "বছর",
+      mo: "মাস",
+      w: "সপ্তাহ",
+      d: "দিন",
+      h: "ঘন্টা",
+      m: "মিনিট",
+      s: "সেকেন্ড",
+      ms: "মিলিসেকেন্ড"
     },
     ca: {
       y: function (c) {
@@ -1862,7 +1881,7 @@ exports.MixpanelGroups = MixpanelGroups;
       ms: function (c) {
         return "milisegon" + (c === 1 ? "" : "s");
       },
-      decimal: ",",
+      decimal: ","
     },
     cs: {
       y: function (c) {
@@ -1893,7 +1912,17 @@ exports.MixpanelGroups = MixpanelGroups;
           getCzechOrSlovakForm(c)
         ];
       },
-      decimal: ",",
+      decimal: ","
+    },
+    cy: {
+      y: "flwyddyn",
+      mo: "mis",
+      w: "wythnos",
+      d: "diwrnod",
+      h: "awr",
+      m: "munud",
+      s: "eiliad",
+      ms: "milieiliad"
     },
     da: {
       y: "år",
@@ -1918,7 +1947,7 @@ exports.MixpanelGroups = MixpanelGroups;
       ms: function (c) {
         return "millisekund" + (c === 1 ? "" : "er");
       },
-      decimal: ",",
+      decimal: ","
     },
     de: {
       y: function (c) {
@@ -1945,7 +1974,7 @@ exports.MixpanelGroups = MixpanelGroups;
       ms: function (c) {
         return "Millisekunde" + (c === 1 ? "" : "n");
       },
-      decimal: ",",
+      decimal: ","
     },
     el: greek,
     en: {
@@ -1973,7 +2002,34 @@ exports.MixpanelGroups = MixpanelGroups;
       ms: function (c) {
         return "millisecond" + (c === 1 ? "" : "s");
       },
-      decimal: ".",
+      decimal: "."
+    },
+    eo: {
+      y: function (c) {
+        return "jaro" + (c === 1 ? "" : "j");
+      },
+      mo: function (c) {
+        return "monato" + (c === 1 ? "" : "j");
+      },
+      w: function (c) {
+        return "semajno" + (c === 1 ? "" : "j");
+      },
+      d: function (c) {
+        return "tago" + (c === 1 ? "" : "j");
+      },
+      h: function (c) {
+        return "horo" + (c === 1 ? "" : "j");
+      },
+      m: function (c) {
+        return "minuto" + (c === 1 ? "" : "j");
+      },
+      s: function (c) {
+        return "sekundo" + (c === 1 ? "" : "j");
+      },
+      ms: function (c) {
+        return "milisekundo" + (c === 1 ? "" : "j");
+      },
+      decimal: ","
     },
     es: {
       y: function (c) {
@@ -2000,7 +2056,7 @@ exports.MixpanelGroups = MixpanelGroups;
       ms: function (c) {
         return "milisegundo" + (c === 1 ? "" : "s");
       },
-      decimal: ",",
+      decimal: ","
     },
     et: {
       y: function (c) {
@@ -2027,7 +2083,18 @@ exports.MixpanelGroups = MixpanelGroups;
       ms: function (c) {
         return "millisekund" + (c === 1 ? "" : "it");
       },
-      decimal: ",",
+      decimal: ","
+    },
+    eu: {
+      y: "urte",
+      mo: "hilabete",
+      w: "aste",
+      d: "egun",
+      h: "ordu",
+      m: "minutu",
+      s: "segundo",
+      ms: "milisegundo",
+      decimal: ","
     },
     fa: {
       y: "سال",
@@ -2038,7 +2105,7 @@ exports.MixpanelGroups = MixpanelGroups;
       m: "دقیقه",
       s: "ثانیه",
       ms: "میلی ثانیه",
-      decimal: ".",
+      decimal: "."
     },
     fi: {
       y: function (c) {
@@ -2065,7 +2132,7 @@ exports.MixpanelGroups = MixpanelGroups;
       ms: function (c) {
         return "millisekunti" + (c === 1 ? "" : "a");
       },
-      decimal: ",",
+      decimal: ","
     },
     fo: {
       y: "ár",
@@ -2086,7 +2153,7 @@ exports.MixpanelGroups = MixpanelGroups;
       },
       s: "sekund",
       ms: "millisekund",
-      decimal: ",",
+      decimal: ","
     },
     fr: {
       y: function (c) {
@@ -2111,7 +2178,7 @@ exports.MixpanelGroups = MixpanelGroups;
       ms: function (c) {
         return "milliseconde" + (c >= 2 ? "s" : "");
       },
-      decimal: ",",
+      decimal: ","
     },
     gr: greek,
     he: {
@@ -2139,7 +2206,7 @@ exports.MixpanelGroups = MixpanelGroups;
       ms: function (c) {
         return c === 1 ? "מילישנייה" : "מילישניות";
       },
-      decimal: ".",
+      decimal: "."
     },
     hr: {
       y: function (c) {
@@ -2199,7 +2266,7 @@ exports.MixpanelGroups = MixpanelGroups;
         }
         return "milisekundi";
       },
-      decimal: ",",
+      decimal: ","
     },
     hi: {
       y: "साल",
@@ -2216,7 +2283,7 @@ exports.MixpanelGroups = MixpanelGroups;
       m: "मिनट",
       s: "सेकंड",
       ms: "मिलीसेकंड",
-      decimal: ".",
+      decimal: "."
     },
     hu: {
       y: "év",
@@ -2227,7 +2294,7 @@ exports.MixpanelGroups = MixpanelGroups;
       m: "perc",
       s: "másodperc",
       ms: "ezredmásodperc",
-      decimal: ",",
+      decimal: ","
     },
     id: {
       y: "tahun",
@@ -2238,7 +2305,7 @@ exports.MixpanelGroups = MixpanelGroups;
       m: "menit",
       s: "detik",
       ms: "milidetik",
-      decimal: ".",
+      decimal: "."
     },
     is: {
       y: "ár",
@@ -2263,7 +2330,7 @@ exports.MixpanelGroups = MixpanelGroups;
       ms: function (c) {
         return "millisekúnd" + (c === 1 ? "a" : "ur");
       },
-      decimal: ".",
+      decimal: "."
     },
     it: {
       y: function (c) {
@@ -2290,7 +2357,7 @@ exports.MixpanelGroups = MixpanelGroups;
       ms: function (c) {
         return "millisecond" + (c === 1 ? "o" : "i");
       },
-      decimal: ",",
+      decimal: ","
     },
     ja: {
       y: "年",
@@ -2301,7 +2368,43 @@ exports.MixpanelGroups = MixpanelGroups;
       m: "分",
       s: "秒",
       ms: "ミリ秒",
-      decimal: ".",
+      decimal: "."
+    },
+    km: {
+      y: "ឆ្នាំ",
+      mo: "ខែ",
+      w: "សប្តាហ៍",
+      d: "ថ្ងៃ",
+      h: "ម៉ោង",
+      m: "នាទី",
+      s: "វិនាទី",
+      ms: "មិល្លីវិនាទី"
+    },
+    kn: {
+      y: function (c) {
+        return c === 1 ? "ವರ್ಷ" : "ವರ್ಷಗಳು";
+      },
+      mo: function (c) {
+        return c === 1 ? "ತಿಂಗಳು" : "ತಿಂಗಳುಗಳು";
+      },
+      w: function (c) {
+        return c === 1 ? "ವಾರ" : "ವಾರಗಳು";
+      },
+      d: function (c) {
+        return c === 1 ? "ದಿನ" : "ದಿನಗಳು";
+      },
+      h: function (c) {
+        return c === 1 ? "ಗಂಟೆ" : "ಗಂಟೆಗಳು";
+      },
+      m: function (c) {
+        return c === 1 ? "ನಿಮಿಷ" : "ನಿಮಿಷಗಳು";
+      },
+      s: function (c) {
+        return c === 1 ? "ಸೆಕೆಂಡ್" : "ಸೆಕೆಂಡುಗಳು";
+      },
+      ms: function (c) {
+        return c === 1 ? "ಮಿಲಿಸೆಕೆಂಡ್" : "ಮಿಲಿಸೆಕೆಂಡುಗಳು";
+      }
     },
     ko: {
       y: "년",
@@ -2312,7 +2415,18 @@ exports.MixpanelGroups = MixpanelGroups;
       m: "분",
       s: "초",
       ms: "밀리 초",
-      decimal: ".",
+      decimal: "."
+    },
+    ku: {
+      y: "sal",
+      mo: "meh",
+      w: "hefte",
+      d: "roj",
+      h: "seet",
+      m: "deqe",
+      s: "saniye",
+      ms: "mîlîçirk",
+      decimal: ","
     },
     lo: {
       y: "ປີ",
@@ -2323,7 +2437,7 @@ exports.MixpanelGroups = MixpanelGroups;
       m: "ນາທີ",
       s: "ວິນາທີ",
       ms: "ມິນລິວິນາທີ",
-      decimal: ",",
+      decimal: ","
     },
     lt: {
       y: function (c) {
@@ -2354,7 +2468,7 @@ exports.MixpanelGroups = MixpanelGroups;
           getLithuanianForm(c)
         ];
       },
-      decimal: ",",
+      decimal: ","
     },
     lv: {
       y: function (c) {
@@ -2381,7 +2495,52 @@ exports.MixpanelGroups = MixpanelGroups;
       ms: function (c) {
         return getLatvianForm(c) ? "milisekunde" : "milisekundes";
       },
-      decimal: ",",
+      decimal: ","
+    },
+    mk: {
+      y: function (c) {
+        return c === 1 ? "година" : "години";
+      },
+      mo: function (c) {
+        return c === 1 ? "месец" : "месеци";
+      },
+      w: function (c) {
+        return c === 1 ? "недела" : "недели";
+      },
+      d: function (c) {
+        return c === 1 ? "ден" : "дена";
+      },
+      h: function (c) {
+        return c === 1 ? "час" : "часа";
+      },
+      m: function (c) {
+        return c === 1 ? "минута" : "минути";
+      },
+      s: function (c) {
+        return c === 1 ? "секунда" : "секунди";
+      },
+      ms: function (c) {
+        return c === 1 ? "милисекунда" : "милисекунди";
+      },
+      decimal: ","
+    },
+    mr: {
+      y: function (c) {
+        return c === 1 ? "वर्ष" : "वर्षे";
+      },
+      mo: function (c) {
+        return c === 1 ? "महिना" : "महिने";
+      },
+      w: function (c) {
+        return c === 1 ? "आठवडा" : "आठवडे";
+      },
+      d: "दिवस",
+      h: "तास",
+      m: function (c) {
+        return c === 1 ? "मिनिट" : "मिनिटे";
+      },
+      s: "सेकंद",
+      ms: "मिलिसेकंद"
     },
     ms: {
       y: "tahun",
@@ -2392,7 +2551,7 @@ exports.MixpanelGroups = MixpanelGroups;
       m: "minit",
       s: "saat",
       ms: "milisaat",
-      decimal: ".",
+      decimal: "."
     },
     nl: {
       y: "jaar",
@@ -2415,7 +2574,7 @@ exports.MixpanelGroups = MixpanelGroups;
       ms: function (c) {
         return c === 1 ? "milliseconde" : "milliseconden";
       },
-      decimal: ",",
+      decimal: ","
     },
     no: {
       y: "år",
@@ -2440,7 +2599,7 @@ exports.MixpanelGroups = MixpanelGroups;
       ms: function (c) {
         return "millisekund" + (c === 1 ? "" : "er");
       },
-      decimal: ",",
+      decimal: ","
     },
     pl: {
       y: function (c) {
@@ -2471,7 +2630,7 @@ exports.MixpanelGroups = MixpanelGroups;
           getPolishForm(c)
         ];
       },
-      decimal: ",",
+      decimal: ","
     },
     pt: {
       y: function (c) {
@@ -2498,7 +2657,7 @@ exports.MixpanelGroups = MixpanelGroups;
       ms: function (c) {
         return "milissegundo" + (c === 1 ? "" : "s");
       },
-      decimal: ",",
+      decimal: ","
     },
     ro: {
       y: function (c) {
@@ -2525,7 +2684,7 @@ exports.MixpanelGroups = MixpanelGroups;
       ms: function (c) {
         return c === 1 ? "milisecundă" : "milisecunde";
       },
-      decimal: ",",
+      decimal: ","
     },
     ru: {
       y: function (c) {
@@ -2554,7 +2713,105 @@ exports.MixpanelGroups = MixpanelGroups;
           getSlavicForm(c)
         ];
       },
-      decimal: ",",
+      decimal: ","
+    },
+    sq: {
+      y: function (c) {
+        return c === 1 ? "vit" : "vjet";
+      },
+      mo: "muaj",
+      w: "javë",
+      d: "ditë",
+      h: "orë",
+      m: function (c) {
+        return "minut" + (c === 1 ? "ë" : "a");
+      },
+      s: function (c) {
+        return "sekond" + (c === 1 ? "ë" : "a");
+      },
+      ms: function (c) {
+        return "milisekond" + (c === 1 ? "ë" : "a");
+      },
+      decimal: ","
+    },
+    sr: {
+      y: function (c) {
+        return ["години", "година", "године"][getSlavicForm(c)];
+      },
+      mo: function (c) {
+        return ["месеци", "месец", "месеца"][getSlavicForm(c)];
+      },
+      w: function (c) {
+        return ["недељи", "недеља", "недеље"][getSlavicForm(c)];
+      },
+      d: function (c) {
+        return ["дани", "дан", "дана"][getSlavicForm(c)];
+      },
+      h: function (c) {
+        return ["сати", "сат", "сата"][getSlavicForm(c)];
+      },
+      m: function (c) {
+        return ["минута", "минут", "минута"][getSlavicForm(c)];
+      },
+      s: function (c) {
+        return ["секунди", "секунда", "секунде"][getSlavicForm(c)];
+      },
+      ms: function (c) {
+        return ["милисекунди", "милисекунда", "милисекунде"][getSlavicForm(c)];
+      },
+      decimal: ","
+    },
+    ta: {
+      y: function (c) {
+        return c === 1 ? "வருடம்" : "ஆண்டுகள்";
+      },
+      mo: function (c) {
+        return c === 1 ? "மாதம்" : "மாதங்கள்";
+      },
+      w: function (c) {
+        return c === 1 ? "வாரம்" : "வாரங்கள்";
+      },
+      d: function (c) {
+        return c === 1 ? "நாள்" : "நாட்கள்";
+      },
+      h: function (c) {
+        return c === 1 ? "மணி" : "மணிநேரம்";
+      },
+      m: function (c) {
+        return "நிமிட" + (c === 1 ? "ம்" : "ங்கள்");
+      },
+      s: function (c) {
+        return "வினாடி" + (c === 1 ? "" : "கள்");
+      },
+      ms: function (c) {
+        return "மில்லி விநாடி" + (c === 1 ? "" : "கள்");
+      }
+    },
+    te: {
+      y: function (c) {
+        return "సంవత్స" + (c === 1 ? "రం" : "రాల");
+      },
+      mo: function (c) {
+        return "నెల" + (c === 1 ? "" : "ల");
+      },
+      w: function (c) {
+        return c === 1 ? "వారం" : "వారాలు";
+      },
+      d: function (c) {
+        return "రోజు" + (c === 1 ? "" : "లు");
+      },
+      h: function (c) {
+        return "గంట" + (c === 1 ? "" : "లు");
+      },
+      m: function (c) {
+        return c === 1 ? "నిమిషం" : "నిమిషాలు";
+      },
+      s: function (c) {
+        return c === 1 ? "సెకను" : "సెకన్లు";
+      },
+      ms: function (c) {
+        return c === 1 ? "మిల్లీసెకన్" : "మిల్లీసెకన్లు";
+      }
     },
     uk: {
       y: function (c) {
@@ -2581,7 +2838,7 @@ exports.MixpanelGroups = MixpanelGroups;
       ms: function (c) {
         return ["мілісекунд", "мілісекунда", "мілісекунди"][getSlavicForm(c)];
       },
-      decimal: ",",
+      decimal: ","
     },
     ur: {
       y: "سال",
@@ -2598,7 +2855,7 @@ exports.MixpanelGroups = MixpanelGroups;
       m: "منٹ",
       s: "سیکنڈ",
       ms: "ملی سیکنڈ",
-      decimal: ".",
+      decimal: "."
     },
     sk: {
       y: function (c) {
@@ -2633,7 +2890,7 @@ exports.MixpanelGroups = MixpanelGroups;
           getCzechOrSlovakForm(c)
         ];
       },
-      decimal: ",",
+      decimal: ","
     },
     sl: {
       y: function (c) {
@@ -2724,7 +2981,7 @@ exports.MixpanelGroups = MixpanelGroups;
           return "milisekund";
         }
       },
-      decimal: ",",
+      decimal: ","
     },
     sv: {
       y: "år",
@@ -2749,7 +3006,7 @@ exports.MixpanelGroups = MixpanelGroups;
       ms: function (c) {
         return "millisekund" + (c === 1 ? "" : "er");
       },
-      decimal: ",",
+      decimal: ","
     },
     sw: {
       y: function (c) {
@@ -2768,7 +3025,7 @@ exports.MixpanelGroups = MixpanelGroups;
       m: "dakika",
       s: "sekunde",
       ms: "milisekunde",
-      decimal: ".",
+      decimal: "."
     },
     tr: {
       y: "yıl",
@@ -2779,18 +3036,18 @@ exports.MixpanelGroups = MixpanelGroups;
       m: "dakika",
       s: "saniye",
       ms: "milisaniye",
-      decimal: ",",
+      decimal: ","
     },
     th: {
       y: "ปี",
       mo: "เดือน",
-      w: "อาทิตย์",
+      w: "สัปดาห์",
       d: "วัน",
       h: "ชั่วโมง",
       m: "นาที",
       s: "วินาที",
       ms: "มิลลิวินาที",
-      decimal: ".",
+      decimal: "."
     },
     vi: {
       y: "năm",
@@ -2801,7 +3058,7 @@ exports.MixpanelGroups = MixpanelGroups;
       m: "phút",
       s: "giây",
       ms: "mili giây",
-      decimal: ",",
+      decimal: ","
     },
     zh_CN: {
       y: "年",
@@ -2812,7 +3069,7 @@ exports.MixpanelGroups = MixpanelGroups;
       m: "分钟",
       s: "秒",
       ms: "毫秒",
-      decimal: ".",
+      decimal: "."
     },
     zh_TW: {
       y: "年",
@@ -2823,8 +3080,8 @@ exports.MixpanelGroups = MixpanelGroups;
       m: "分鐘",
       s: "秒",
       ms: "毫秒",
-      decimal: ".",
-    },
+      decimal: "."
+    }
   };
 
   // You can create a humanizer, which returns a function with default
@@ -2839,7 +3096,6 @@ exports.MixpanelGroups = MixpanelGroups;
       result,
       {
         language: "en",
-        delimiter: ", ",
         spacer: " ",
         conjunction: "",
         serialComma: true,
@@ -2854,8 +3110,8 @@ exports.MixpanelGroups = MixpanelGroups;
           h: 3600000,
           m: 60000,
           s: 1000,
-          ms: 1,
-        },
+          ms: 1
+        }
       },
       passedOptions
     );
@@ -2926,7 +3182,7 @@ exports.MixpanelGroups = MixpanelGroups;
       // Add the string.
       pieces.push({
         unitCount: unitCount,
-        unitName: unitName,
+        unitName: unitName
       });
 
       // Remove what we just figured out.
@@ -2981,13 +3237,22 @@ exports.MixpanelGroups = MixpanelGroups;
     }
 
     if (result.length) {
+      var delimiter;
+      if (has(options, "delimiter")) {
+        delimiter = options.delimiter;
+      } else if (has(dictionary, "delimiter")) {
+        delimiter = dictionary.delimiter;
+      } else {
+        delimiter = ", ";
+      }
+
       if (!options.conjunction || result.length === 1) {
-        return result.join(options.delimiter);
+        return result.join(delimiter);
       } else if (result.length === 2) {
         return result.join(options.conjunction);
       } else if (result.length > 2) {
         return (
-          result.slice(0, -1).join(options.delimiter) +
+          result.slice(0, -1).join(delimiter) +
           (options.serialComma ? "," : "") +
           options.conjunction +
           result.slice(-1)
@@ -3013,7 +3278,12 @@ exports.MixpanelGroups = MixpanelGroups;
       decimal = ".";
     }
 
-    var countStr = count.toString().replace(".", decimal);
+    var countStr;
+    if (typeof dictionary._formatCount === "function") {
+      countStr = dictionary._formatCount(count, decimal);
+    } else {
+      countStr = count.toString().replace(".", decimal);
+    }
 
     var dictionaryValue = dictionary[type];
     var word;
@@ -3039,7 +3309,19 @@ exports.MixpanelGroups = MixpanelGroups;
     return destination;
   }
 
-  // Internal helper function for Polish language.
+  function getArabicForm(c) {
+    if (c === 1) {
+      return 0;
+    }
+    if (c === 2) {
+      return 1;
+    }
+    if (c > 2 && c < 11) {
+      return 2;
+    }
+    return 0;
+  }
+
   function getPolishForm(c) {
     if (c === 1) {
       return 0;
@@ -3052,7 +3334,6 @@ exports.MixpanelGroups = MixpanelGroups;
     }
   }
 
-  // Internal helper function for Russian and Ukranian languages.
   function getSlavicForm(c) {
     if (Math.floor(c) !== c) {
       return 2;
@@ -3071,7 +3352,6 @@ exports.MixpanelGroups = MixpanelGroups;
     }
   }
 
-  // Internal helper function for Slovak language.
   function getCzechOrSlovakForm(c) {
     if (c === 1) {
       return 0;
@@ -3084,7 +3364,6 @@ exports.MixpanelGroups = MixpanelGroups;
     }
   }
 
-  // Internal helper function for Lithuanian language.
   function getLithuanianForm(c) {
     if (c === 1 || (c % 10 === 1 && c % 100 > 20)) {
       return 0;
@@ -3099,7 +3378,6 @@ exports.MixpanelGroups = MixpanelGroups;
     }
   }
 
-  // Internal helper function for Latvian language.
   function getLatvianForm(c) {
     return c % 10 === 1 && c % 100 !== 11;
   }
@@ -3148,32 +3426,23 @@ exports.MixpanelGroups = MixpanelGroups;
 "use strict";
 
 const os = __webpack_require__(87);
-const tty = __webpack_require__(867);
 const hasFlag = __webpack_require__(364);
 
-const {env} = process;
+const env = process.env;
 
 let forceColor;
 if (hasFlag('no-color') ||
 	hasFlag('no-colors') ||
-	hasFlag('color=false') ||
-	hasFlag('color=never')) {
-	forceColor = 0;
+	hasFlag('color=false')) {
+	forceColor = false;
 } else if (hasFlag('color') ||
 	hasFlag('colors') ||
 	hasFlag('color=true') ||
 	hasFlag('color=always')) {
-	forceColor = 1;
+	forceColor = true;
 }
-
 if ('FORCE_COLOR' in env) {
-	if (env.FORCE_COLOR === 'true') {
-		forceColor = 1;
-	} else if (env.FORCE_COLOR === 'false') {
-		forceColor = 0;
-	} else {
-		forceColor = env.FORCE_COLOR.length === 0 ? 1 : Math.min(parseInt(env.FORCE_COLOR, 10), 3);
-	}
+	forceColor = env.FORCE_COLOR.length === 0 || parseInt(env.FORCE_COLOR, 10) !== 0;
 }
 
 function translateLevel(level) {
@@ -3189,8 +3458,8 @@ function translateLevel(level) {
 	};
 }
 
-function supportsColor(haveStream, streamIsTTY) {
-	if (forceColor === 0) {
+function supportsColor(stream) {
+	if (forceColor === false) {
 		return 0;
 	}
 
@@ -3204,21 +3473,22 @@ function supportsColor(haveStream, streamIsTTY) {
 		return 2;
 	}
 
-	if (haveStream && !streamIsTTY && forceColor === undefined) {
+	if (stream && !stream.isTTY && forceColor !== true) {
 		return 0;
 	}
 
-	const min = forceColor || 0;
-
-	if (env.TERM === 'dumb') {
-		return min;
-	}
+	const min = forceColor ? 1 : 0;
 
 	if (process.platform === 'win32') {
-		// Windows 10 build 10586 is the first Windows release that supports 256 colors.
-		// Windows 10 build 14931 is the first release that supports 16m/TrueColor.
+		// Node.js 7.5.0 is the first version of Node.js to include a patch to
+		// libuv that enables 256 color output on Windows. Anything earlier and it
+		// won't work. However, here we target Node.js 8 at minimum as it is an LTS
+		// release, and Node.js 7 is not. Windows 10 build 10586 is the first Windows
+		// release that supports 256 colors. Windows 10 build 14931 is the first release
+		// that supports 16m/TrueColor.
 		const osRelease = os.release().split('.');
 		if (
+			Number(process.versions.node.split('.')[0]) >= 8 &&
 			Number(osRelease[0]) >= 10 &&
 			Number(osRelease[2]) >= 10586
 		) {
@@ -3229,7 +3499,7 @@ function supportsColor(haveStream, streamIsTTY) {
 	}
 
 	if ('CI' in env) {
-		if (['TRAVIS', 'CIRCLECI', 'APPVEYOR', 'GITLAB_CI', 'GITHUB_ACTIONS', 'BUILDKITE'].some(sign => sign in env) || env.CI_NAME === 'codeship') {
+		if (['TRAVIS', 'CIRCLECI', 'APPVEYOR', 'GITLAB_CI'].some(sign => sign in env) || env.CI_NAME === 'codeship') {
 			return 1;
 		}
 
@@ -3268,18 +3538,22 @@ function supportsColor(haveStream, streamIsTTY) {
 		return 1;
 	}
 
+	if (env.TERM === 'dumb') {
+		return min;
+	}
+
 	return min;
 }
 
 function getSupportLevel(stream) {
-	const level = supportsColor(stream, stream && stream.isTTY);
+	const level = supportsColor(stream);
 	return translateLevel(level);
 }
 
 module.exports = {
 	supportsColor: getSupportLevel,
-	stdout: translateLevel(supportsColor(true, tty.isatty(1))),
-	stderr: translateLevel(supportsColor(true, tty.isatty(2)))
+	stdout: getSupportLevel(process.stdout),
+	stderr: getSupportLevel(process.stderr)
 };
 
 
@@ -3429,7 +3703,60 @@ module.exports = require("buffer");
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-const VERSION = "2.13.3";
+const VERSION = "2.14.0";
+
+function ownKeys(object, enumerableOnly) {
+  var keys = Object.keys(object);
+
+  if (Object.getOwnPropertySymbols) {
+    var symbols = Object.getOwnPropertySymbols(object);
+
+    if (enumerableOnly) {
+      symbols = symbols.filter(function (sym) {
+        return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+      });
+    }
+
+    keys.push.apply(keys, symbols);
+  }
+
+  return keys;
+}
+
+function _objectSpread2(target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i] != null ? arguments[i] : {};
+
+    if (i % 2) {
+      ownKeys(Object(source), true).forEach(function (key) {
+        _defineProperty(target, key, source[key]);
+      });
+    } else if (Object.getOwnPropertyDescriptors) {
+      Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
+    } else {
+      ownKeys(Object(source)).forEach(function (key) {
+        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+      });
+    }
+  }
+
+  return target;
+}
+
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+
+  return obj;
+}
 
 /**
  * Some “list” response that can be paginated have a different response structure
@@ -3448,6 +3775,13 @@ const VERSION = "2.13.3";
  * otherwise match: https://developer.github.com/v3/repos/statuses/#get-the-combined-status-for-a-specific-ref
  */
 function normalizePaginatedListResponse(response) {
+  // endpoints can respond with 204 if repository is empty
+  if (!response.data) {
+    return _objectSpread2(_objectSpread2({}, response), {}, {
+      data: []
+    });
+  }
+
   const responseNeedsNormalization = "total_count" in response.data && !("url" in response.data);
   if (!responseNeedsNormalization) return response; // keep the additional properties intact as there is currently no other way
   // to retrieve the same information.
@@ -3486,19 +3820,32 @@ function iterator(octokit, route, parameters) {
         if (!url) return {
           done: true
         };
-        const response = await requestMethod({
-          method,
-          url,
-          headers
-        });
-        const normalizedResponse = normalizePaginatedListResponse(response); // `response.headers.link` format:
-        // '<https://api.github.com/users/aseemk/followers?page=2>; rel="next", <https://api.github.com/users/aseemk/followers?page=2>; rel="last"'
-        // sets `url` to undefined if "next" URL is not present or `link` header is not set
 
-        url = ((normalizedResponse.headers.link || "").match(/<([^>]+)>;\s*rel="next"/) || [])[1];
-        return {
-          value: normalizedResponse
-        };
+        try {
+          const response = await requestMethod({
+            method,
+            url,
+            headers
+          });
+          const normalizedResponse = normalizePaginatedListResponse(response); // `response.headers.link` format:
+          // '<https://api.github.com/users/aseemk/followers?page=2>; rel="next", <https://api.github.com/users/aseemk/followers?page=2>; rel="last"'
+          // sets `url` to undefined if "next" URL is not present or `link` header is not set
+
+          url = ((normalizedResponse.headers.link || "").match(/<([^>]+)>;\s*rel="next"/) || [])[1];
+          return {
+            value: normalizedResponse
+          };
+        } catch (error) {
+          if (error.status !== 409) throw error;
+          url = "";
+          return {
+            value: {
+              status: 200,
+              headers: {},
+              data: []
+            }
+          };
+        }
       }
 
     })
@@ -3540,7 +3887,7 @@ const composePaginateRest = Object.assign(paginate, {
   iterator
 });
 
-const paginatingEndpoints = ["GET /app/installations", "GET /applications/grants", "GET /authorizations", "GET /enterprises/{enterprise}/actions/permissions/organizations", "GET /enterprises/{enterprise}/actions/runner-groups", "GET /enterprises/{enterprise}/actions/runner-groups/{runner_group_id}/organizations", "GET /enterprises/{enterprise}/actions/runner-groups/{runner_group_id}/runners", "GET /enterprises/{enterprise}/actions/runners", "GET /enterprises/{enterprise}/actions/runners/downloads", "GET /events", "GET /gists", "GET /gists/public", "GET /gists/starred", "GET /gists/{gist_id}/comments", "GET /gists/{gist_id}/commits", "GET /gists/{gist_id}/forks", "GET /installation/repositories", "GET /issues", "GET /marketplace_listing/plans", "GET /marketplace_listing/plans/{plan_id}/accounts", "GET /marketplace_listing/stubbed/plans", "GET /marketplace_listing/stubbed/plans/{plan_id}/accounts", "GET /networks/{owner}/{repo}/events", "GET /notifications", "GET /organizations", "GET /orgs/{org}/actions/permissions/repositories", "GET /orgs/{org}/actions/runner-groups", "GET /orgs/{org}/actions/runner-groups/{runner_group_id}/repositories", "GET /orgs/{org}/actions/runner-groups/{runner_group_id}/runners", "GET /orgs/{org}/actions/runners", "GET /orgs/{org}/actions/runners/downloads", "GET /orgs/{org}/actions/secrets", "GET /orgs/{org}/actions/secrets/{secret_name}/repositories", "GET /orgs/{org}/blocks", "GET /orgs/{org}/credential-authorizations", "GET /orgs/{org}/events", "GET /orgs/{org}/failed_invitations", "GET /orgs/{org}/hooks", "GET /orgs/{org}/installations", "GET /orgs/{org}/invitations", "GET /orgs/{org}/invitations/{invitation_id}/teams", "GET /orgs/{org}/issues", "GET /orgs/{org}/members", "GET /orgs/{org}/migrations", "GET /orgs/{org}/migrations/{migration_id}/repositories", "GET /orgs/{org}/outside_collaborators", "GET /orgs/{org}/projects", "GET /orgs/{org}/public_members", "GET /orgs/{org}/repos", "GET /orgs/{org}/team-sync/groups", "GET /orgs/{org}/teams", "GET /orgs/{org}/teams/{team_slug}/discussions", "GET /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments", "GET /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments/{comment_number}/reactions", "GET /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/reactions", "GET /orgs/{org}/teams/{team_slug}/invitations", "GET /orgs/{org}/teams/{team_slug}/members", "GET /orgs/{org}/teams/{team_slug}/projects", "GET /orgs/{org}/teams/{team_slug}/repos", "GET /orgs/{org}/teams/{team_slug}/team-sync/group-mappings", "GET /orgs/{org}/teams/{team_slug}/teams", "GET /projects/columns/{column_id}/cards", "GET /projects/{project_id}/collaborators", "GET /projects/{project_id}/columns", "GET /repos/{owner}/{repo}/actions/artifacts", "GET /repos/{owner}/{repo}/actions/runners", "GET /repos/{owner}/{repo}/actions/runners/downloads", "GET /repos/{owner}/{repo}/actions/runs", "GET /repos/{owner}/{repo}/actions/runs/{run_id}/artifacts", "GET /repos/{owner}/{repo}/actions/runs/{run_id}/jobs", "GET /repos/{owner}/{repo}/actions/secrets", "GET /repos/{owner}/{repo}/actions/workflows", "GET /repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs", "GET /repos/{owner}/{repo}/assignees", "GET /repos/{owner}/{repo}/branches", "GET /repos/{owner}/{repo}/check-runs/{check_run_id}/annotations", "GET /repos/{owner}/{repo}/check-suites/{check_suite_id}/check-runs", "GET /repos/{owner}/{repo}/code-scanning/alerts", "GET /repos/{owner}/{repo}/code-scanning/alerts/{alert_number}/instances", "GET /repos/{owner}/{repo}/code-scanning/analyses", "GET /repos/{owner}/{repo}/collaborators", "GET /repos/{owner}/{repo}/comments", "GET /repos/{owner}/{repo}/comments/{comment_id}/reactions", "GET /repos/{owner}/{repo}/commits", "GET /repos/{owner}/{repo}/commits/{commit_sha}/branches-where-head", "GET /repos/{owner}/{repo}/commits/{commit_sha}/comments", "GET /repos/{owner}/{repo}/commits/{commit_sha}/pulls", "GET /repos/{owner}/{repo}/commits/{ref}/check-runs", "GET /repos/{owner}/{repo}/commits/{ref}/check-suites", "GET /repos/{owner}/{repo}/commits/{ref}/statuses", "GET /repos/{owner}/{repo}/contributors", "GET /repos/{owner}/{repo}/deployments", "GET /repos/{owner}/{repo}/deployments/{deployment_id}/statuses", "GET /repos/{owner}/{repo}/events", "GET /repos/{owner}/{repo}/forks", "GET /repos/{owner}/{repo}/git/matching-refs/{ref}", "GET /repos/{owner}/{repo}/hooks", "GET /repos/{owner}/{repo}/invitations", "GET /repos/{owner}/{repo}/issues", "GET /repos/{owner}/{repo}/issues/comments", "GET /repos/{owner}/{repo}/issues/comments/{comment_id}/reactions", "GET /repos/{owner}/{repo}/issues/events", "GET /repos/{owner}/{repo}/issues/{issue_number}/comments", "GET /repos/{owner}/{repo}/issues/{issue_number}/events", "GET /repos/{owner}/{repo}/issues/{issue_number}/labels", "GET /repos/{owner}/{repo}/issues/{issue_number}/reactions", "GET /repos/{owner}/{repo}/issues/{issue_number}/timeline", "GET /repos/{owner}/{repo}/keys", "GET /repos/{owner}/{repo}/labels", "GET /repos/{owner}/{repo}/milestones", "GET /repos/{owner}/{repo}/milestones/{milestone_number}/labels", "GET /repos/{owner}/{repo}/notifications", "GET /repos/{owner}/{repo}/pages/builds", "GET /repos/{owner}/{repo}/projects", "GET /repos/{owner}/{repo}/pulls", "GET /repos/{owner}/{repo}/pulls/comments", "GET /repos/{owner}/{repo}/pulls/comments/{comment_id}/reactions", "GET /repos/{owner}/{repo}/pulls/{pull_number}/comments", "GET /repos/{owner}/{repo}/pulls/{pull_number}/commits", "GET /repos/{owner}/{repo}/pulls/{pull_number}/files", "GET /repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers", "GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews", "GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}/comments", "GET /repos/{owner}/{repo}/releases", "GET /repos/{owner}/{repo}/releases/{release_id}/assets", "GET /repos/{owner}/{repo}/secret-scanning/alerts", "GET /repos/{owner}/{repo}/stargazers", "GET /repos/{owner}/{repo}/subscribers", "GET /repos/{owner}/{repo}/tags", "GET /repos/{owner}/{repo}/teams", "GET /repositories", "GET /repositories/{repository_id}/environments/{environment_name}/secrets", "GET /scim/v2/enterprises/{enterprise}/Groups", "GET /scim/v2/enterprises/{enterprise}/Users", "GET /scim/v2/organizations/{org}/Users", "GET /search/code", "GET /search/commits", "GET /search/issues", "GET /search/labels", "GET /search/repositories", "GET /search/topics", "GET /search/users", "GET /teams/{team_id}/discussions", "GET /teams/{team_id}/discussions/{discussion_number}/comments", "GET /teams/{team_id}/discussions/{discussion_number}/comments/{comment_number}/reactions", "GET /teams/{team_id}/discussions/{discussion_number}/reactions", "GET /teams/{team_id}/invitations", "GET /teams/{team_id}/members", "GET /teams/{team_id}/projects", "GET /teams/{team_id}/repos", "GET /teams/{team_id}/team-sync/group-mappings", "GET /teams/{team_id}/teams", "GET /user/blocks", "GET /user/emails", "GET /user/followers", "GET /user/following", "GET /user/gpg_keys", "GET /user/installations", "GET /user/installations/{installation_id}/repositories", "GET /user/issues", "GET /user/keys", "GET /user/marketplace_purchases", "GET /user/marketplace_purchases/stubbed", "GET /user/memberships/orgs", "GET /user/migrations", "GET /user/migrations/{migration_id}/repositories", "GET /user/orgs", "GET /user/public_emails", "GET /user/repos", "GET /user/repository_invitations", "GET /user/starred", "GET /user/subscriptions", "GET /user/teams", "GET /users", "GET /users/{username}/events", "GET /users/{username}/events/orgs/{org}", "GET /users/{username}/events/public", "GET /users/{username}/followers", "GET /users/{username}/following", "GET /users/{username}/gists", "GET /users/{username}/gpg_keys", "GET /users/{username}/keys", "GET /users/{username}/orgs", "GET /users/{username}/projects", "GET /users/{username}/received_events", "GET /users/{username}/received_events/public", "GET /users/{username}/repos", "GET /users/{username}/starred", "GET /users/{username}/subscriptions"];
+const paginatingEndpoints = ["GET /app/hook/deliveries", "GET /app/installations", "GET /applications/grants", "GET /authorizations", "GET /enterprises/{enterprise}/actions/permissions/organizations", "GET /enterprises/{enterprise}/actions/runner-groups", "GET /enterprises/{enterprise}/actions/runner-groups/{runner_group_id}/organizations", "GET /enterprises/{enterprise}/actions/runner-groups/{runner_group_id}/runners", "GET /enterprises/{enterprise}/actions/runners", "GET /enterprises/{enterprise}/actions/runners/downloads", "GET /events", "GET /gists", "GET /gists/public", "GET /gists/starred", "GET /gists/{gist_id}/comments", "GET /gists/{gist_id}/commits", "GET /gists/{gist_id}/forks", "GET /installation/repositories", "GET /issues", "GET /marketplace_listing/plans", "GET /marketplace_listing/plans/{plan_id}/accounts", "GET /marketplace_listing/stubbed/plans", "GET /marketplace_listing/stubbed/plans/{plan_id}/accounts", "GET /networks/{owner}/{repo}/events", "GET /notifications", "GET /organizations", "GET /orgs/{org}/actions/permissions/repositories", "GET /orgs/{org}/actions/runner-groups", "GET /orgs/{org}/actions/runner-groups/{runner_group_id}/repositories", "GET /orgs/{org}/actions/runner-groups/{runner_group_id}/runners", "GET /orgs/{org}/actions/runners", "GET /orgs/{org}/actions/runners/downloads", "GET /orgs/{org}/actions/secrets", "GET /orgs/{org}/actions/secrets/{secret_name}/repositories", "GET /orgs/{org}/blocks", "GET /orgs/{org}/credential-authorizations", "GET /orgs/{org}/events", "GET /orgs/{org}/failed_invitations", "GET /orgs/{org}/hooks", "GET /orgs/{org}/hooks/{hook_id}/deliveries", "GET /orgs/{org}/installations", "GET /orgs/{org}/invitations", "GET /orgs/{org}/invitations/{invitation_id}/teams", "GET /orgs/{org}/issues", "GET /orgs/{org}/members", "GET /orgs/{org}/migrations", "GET /orgs/{org}/migrations/{migration_id}/repositories", "GET /orgs/{org}/outside_collaborators", "GET /orgs/{org}/projects", "GET /orgs/{org}/public_members", "GET /orgs/{org}/repos", "GET /orgs/{org}/team-sync/groups", "GET /orgs/{org}/teams", "GET /orgs/{org}/teams/{team_slug}/discussions", "GET /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments", "GET /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments/{comment_number}/reactions", "GET /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/reactions", "GET /orgs/{org}/teams/{team_slug}/invitations", "GET /orgs/{org}/teams/{team_slug}/members", "GET /orgs/{org}/teams/{team_slug}/projects", "GET /orgs/{org}/teams/{team_slug}/repos", "GET /orgs/{org}/teams/{team_slug}/team-sync/group-mappings", "GET /orgs/{org}/teams/{team_slug}/teams", "GET /projects/columns/{column_id}/cards", "GET /projects/{project_id}/collaborators", "GET /projects/{project_id}/columns", "GET /repos/{owner}/{repo}/actions/artifacts", "GET /repos/{owner}/{repo}/actions/runners", "GET /repos/{owner}/{repo}/actions/runners/downloads", "GET /repos/{owner}/{repo}/actions/runs", "GET /repos/{owner}/{repo}/actions/runs/{run_id}/artifacts", "GET /repos/{owner}/{repo}/actions/runs/{run_id}/jobs", "GET /repos/{owner}/{repo}/actions/secrets", "GET /repos/{owner}/{repo}/actions/workflows", "GET /repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs", "GET /repos/{owner}/{repo}/assignees", "GET /repos/{owner}/{repo}/branches", "GET /repos/{owner}/{repo}/check-runs/{check_run_id}/annotations", "GET /repos/{owner}/{repo}/check-suites/{check_suite_id}/check-runs", "GET /repos/{owner}/{repo}/code-scanning/alerts", "GET /repos/{owner}/{repo}/code-scanning/alerts/{alert_number}/instances", "GET /repos/{owner}/{repo}/code-scanning/analyses", "GET /repos/{owner}/{repo}/collaborators", "GET /repos/{owner}/{repo}/comments", "GET /repos/{owner}/{repo}/comments/{comment_id}/reactions", "GET /repos/{owner}/{repo}/commits", "GET /repos/{owner}/{repo}/commits/{commit_sha}/branches-where-head", "GET /repos/{owner}/{repo}/commits/{commit_sha}/comments", "GET /repos/{owner}/{repo}/commits/{commit_sha}/pulls", "GET /repos/{owner}/{repo}/commits/{ref}/check-runs", "GET /repos/{owner}/{repo}/commits/{ref}/check-suites", "GET /repos/{owner}/{repo}/commits/{ref}/statuses", "GET /repos/{owner}/{repo}/contributors", "GET /repos/{owner}/{repo}/deployments", "GET /repos/{owner}/{repo}/deployments/{deployment_id}/statuses", "GET /repos/{owner}/{repo}/events", "GET /repos/{owner}/{repo}/forks", "GET /repos/{owner}/{repo}/git/matching-refs/{ref}", "GET /repos/{owner}/{repo}/hooks", "GET /repos/{owner}/{repo}/hooks/{hook_id}/deliveries", "GET /repos/{owner}/{repo}/invitations", "GET /repos/{owner}/{repo}/issues", "GET /repos/{owner}/{repo}/issues/comments", "GET /repos/{owner}/{repo}/issues/comments/{comment_id}/reactions", "GET /repos/{owner}/{repo}/issues/events", "GET /repos/{owner}/{repo}/issues/{issue_number}/comments", "GET /repos/{owner}/{repo}/issues/{issue_number}/events", "GET /repos/{owner}/{repo}/issues/{issue_number}/labels", "GET /repos/{owner}/{repo}/issues/{issue_number}/reactions", "GET /repos/{owner}/{repo}/issues/{issue_number}/timeline", "GET /repos/{owner}/{repo}/keys", "GET /repos/{owner}/{repo}/labels", "GET /repos/{owner}/{repo}/milestones", "GET /repos/{owner}/{repo}/milestones/{milestone_number}/labels", "GET /repos/{owner}/{repo}/notifications", "GET /repos/{owner}/{repo}/pages/builds", "GET /repos/{owner}/{repo}/projects", "GET /repos/{owner}/{repo}/pulls", "GET /repos/{owner}/{repo}/pulls/comments", "GET /repos/{owner}/{repo}/pulls/comments/{comment_id}/reactions", "GET /repos/{owner}/{repo}/pulls/{pull_number}/comments", "GET /repos/{owner}/{repo}/pulls/{pull_number}/commits", "GET /repos/{owner}/{repo}/pulls/{pull_number}/files", "GET /repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers", "GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews", "GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}/comments", "GET /repos/{owner}/{repo}/releases", "GET /repos/{owner}/{repo}/releases/{release_id}/assets", "GET /repos/{owner}/{repo}/secret-scanning/alerts", "GET /repos/{owner}/{repo}/stargazers", "GET /repos/{owner}/{repo}/subscribers", "GET /repos/{owner}/{repo}/tags", "GET /repos/{owner}/{repo}/teams", "GET /repositories", "GET /repositories/{repository_id}/environments/{environment_name}/secrets", "GET /scim/v2/enterprises/{enterprise}/Groups", "GET /scim/v2/enterprises/{enterprise}/Users", "GET /scim/v2/organizations/{org}/Users", "GET /search/code", "GET /search/commits", "GET /search/issues", "GET /search/labels", "GET /search/repositories", "GET /search/topics", "GET /search/users", "GET /teams/{team_id}/discussions", "GET /teams/{team_id}/discussions/{discussion_number}/comments", "GET /teams/{team_id}/discussions/{discussion_number}/comments/{comment_number}/reactions", "GET /teams/{team_id}/discussions/{discussion_number}/reactions", "GET /teams/{team_id}/invitations", "GET /teams/{team_id}/members", "GET /teams/{team_id}/projects", "GET /teams/{team_id}/repos", "GET /teams/{team_id}/team-sync/group-mappings", "GET /teams/{team_id}/teams", "GET /user/blocks", "GET /user/emails", "GET /user/followers", "GET /user/following", "GET /user/gpg_keys", "GET /user/installations", "GET /user/installations/{installation_id}/repositories", "GET /user/issues", "GET /user/keys", "GET /user/marketplace_purchases", "GET /user/marketplace_purchases/stubbed", "GET /user/memberships/orgs", "GET /user/migrations", "GET /user/migrations/{migration_id}/repositories", "GET /user/orgs", "GET /user/public_emails", "GET /user/repos", "GET /user/repository_invitations", "GET /user/starred", "GET /user/subscriptions", "GET /user/teams", "GET /users", "GET /users/{username}/events", "GET /users/{username}/events/orgs/{org}", "GET /users/{username}/events/public", "GET /users/{username}/followers", "GET /users/{username}/following", "GET /users/{username}/gists", "GET /users/{username}/gpg_keys", "GET /users/{username}/keys", "GET /users/{username}/orgs", "GET /users/{username}/projects", "GET /users/{username}/received_events", "GET /users/{username}/received_events/public", "GET /users/{username}/repos", "GET /users/{username}/starred", "GET /users/{username}/subscriptions"];
 
 function isPaginatingEndpoint(arg) {
   if (typeof arg === "string") {
@@ -3833,6 +4180,52 @@ module.exports = {
 
 /***/ }),
 
+/***/ 356:
+/***/ (function(__unusedmodule, exports) {
+
+"use strict";
+
+
+Object.defineProperty(exports, '__esModule', { value: true });
+
+/*!
+ * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
+ *
+ * Copyright (c) 2014-2017, Jon Schlinkert.
+ * Released under the MIT License.
+ */
+
+function isObject(o) {
+  return Object.prototype.toString.call(o) === '[object Object]';
+}
+
+function isPlainObject(o) {
+  var ctor,prot;
+
+  if (isObject(o) === false) return false;
+
+  // If has modified constructor
+  ctor = o.constructor;
+  if (ctor === undefined) return true;
+
+  // If has modified prototype
+  prot = ctor.prototype;
+  if (isObject(prot) === false) return false;
+
+  // If constructor does not have an Object-specific method
+  if (prot.hasOwnProperty('isPrototypeOf') === false) {
+    return false;
+  }
+
+  // Most likely a plain Object
+  return true;
+}
+
+exports.isPlainObject = isPlainObject;
+
+
+/***/ }),
+
 /***/ 357:
 /***/ (function(module) {
 
@@ -3851,12 +4244,25 @@ module.exports = (list) => (list || []).reduce((a, b) => a + b, 0);
 /***/ 359:
 /***/ (function(module) {
 
-module.exports = (data = {}) => ({
-  id: data.databaseId,
-  url: data.url,
-  login: data.login,
-  avatarUrl: data.avatarUrl,
-});
+module.exports = (data = {}) => {
+  if (data == null) {
+    console.log("::error file=parseUser.js,line=10,col=15::Nil user")
+    return {
+      id: '',
+      url: '',
+      login: '',
+      avatarUrl: '',
+    }
+  } else {
+    return {
+      id: data.databaseId,
+      url: data.url,
+      login: data.login,
+      avatarUrl: data.avatarUrl,
+    }
+  }
+}
+
 
 
 /***/ }),
@@ -3866,12 +4272,12 @@ module.exports = (data = {}) => ({
 
 "use strict";
 
-
-module.exports = (flag, argv = process.argv) => {
+module.exports = (flag, argv) => {
+	argv = argv || process.argv;
 	const prefix = flag.startsWith('-') ? '' : (flag.length === 1 ? '-' : '--');
-	const position = argv.indexOf(prefix + flag);
-	const terminatorPosition = argv.indexOf('--');
-	return position !== -1 && (terminatorPosition === -1 || position < terminatorPosition);
+	const pos = argv.indexOf(prefix + flag);
+	const terminatorPos = argv.indexOf('--');
+	return pos !== -1 && (terminatorPos === -1 ? true : pos < terminatorPos);
 };
 
 
@@ -4481,7 +4887,7 @@ exports.MixpanelPeople = MixpanelPeople;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-var isPlainObject = __webpack_require__(3);
+var isPlainObject = __webpack_require__(356);
 var universalUserAgent = __webpack_require__(796);
 
 function lowercaseKeys(object) {
@@ -4845,7 +5251,7 @@ function withDefaults(oldDefaults, newDefaults) {
   });
 }
 
-const VERSION = "6.0.11";
+const VERSION = "6.0.12";
 
 const userAgent = `octokit-endpoint.js/${VERSION} ${universalUserAgent.getUserAgent()}`; // DEFAULTS has all properties set that EndpointOptions has, except url.
 // So we use RequestParameters and add method as additional required property.
@@ -5240,14 +5646,27 @@ exports.default = parseProxyResponse;
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.issue = exports.issueCommand = void 0;
 const os = __importStar(__webpack_require__(87));
 const utils_1 = __webpack_require__(82);
 /**
@@ -5602,8 +6021,9 @@ function _objectWithoutProperties(source, excluded) {
   return target;
 }
 
-const VERSION = "3.3.2";
+const VERSION = "3.5.1";
 
+const _excluded = ["authStrategy"];
 class Octokit {
   constructor(options = {}) {
     const hook = new beforeAfterHook.Collection();
@@ -5665,7 +6085,7 @@ class Octokit {
       const {
         authStrategy
       } = options,
-            otherOptions = _objectWithoutProperties(options, ["authStrategy"]);
+            otherOptions = _objectWithoutProperties(options, _excluded);
 
       const auth = authStrategy(Object.assign({
         request: this.request,
@@ -7405,7 +7825,8 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 var deprecation = __webpack_require__(692);
 var once = _interopDefault(__webpack_require__(49));
 
-const logOnce = once(deprecation => console.warn(deprecation));
+const logOnceCode = once(deprecation => console.warn(deprecation));
+const logOnceHeaders = once(deprecation => console.warn(deprecation));
 /**
  * Error with extra properties to help with debugging
  */
@@ -7422,14 +7843,17 @@ class RequestError extends Error {
 
     this.name = "HttpError";
     this.status = statusCode;
-    Object.defineProperty(this, "code", {
-      get() {
-        logOnce(new deprecation.Deprecation("[@octokit/request-error] `error.code` is deprecated, use `error.status`."));
-        return statusCode;
-      }
+    let headers;
 
-    });
-    this.headers = options.headers || {}; // redact request credentials without mutating original request options
+    if ("headers" in options && typeof options.headers !== "undefined") {
+      headers = options.headers;
+    }
+
+    if ("response" in options) {
+      this.response = options.response;
+      headers = options.response.headers;
+    } // redact request credentials without mutating original request options
+
 
     const requestCopy = Object.assign({}, options.request);
 
@@ -7444,7 +7868,22 @@ class RequestError extends Error {
     .replace(/\bclient_secret=\w+/g, "client_secret=[REDACTED]") // OAuth tokens can be passed as URL query parameters, although it is not recommended
     // see https://developer.github.com/v3/#oauth2-token-sent-in-a-header
     .replace(/\baccess_token=\w+/g, "access_token=[REDACTED]");
-    this.request = requestCopy;
+    this.request = requestCopy; // deprecations
+
+    Object.defineProperty(this, "code", {
+      get() {
+        logOnceCode(new deprecation.Deprecation("[@octokit/request-error] `error.code` is deprecated, use `error.status`."));
+        return statusCode;
+      }
+
+    });
+    Object.defineProperty(this, "headers", {
+      get() {
+        logOnceHeaders(new deprecation.Deprecation("[@octokit/request-error] `error.headers` is deprecated, use `error.response.headers`."));
+        return headers || {};
+      }
+
+    });
   }
 
 }
@@ -7503,6 +7942,25 @@ exports.getOctokit = getOctokit;
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -7512,14 +7970,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
-    return result;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.getState = exports.saveState = exports.group = exports.endGroup = exports.startGroup = exports.info = exports.warning = exports.error = exports.debug = exports.isDebug = exports.setFailed = exports.setCommandEcho = exports.setOutput = exports.getBooleanInput = exports.getMultilineInput = exports.getInput = exports.addPath = exports.setSecret = exports.exportVariable = exports.ExitCode = void 0;
 const command_1 = __webpack_require__(431);
 const file_command_1 = __webpack_require__(102);
 const utils_1 = __webpack_require__(82);
@@ -7586,7 +8038,9 @@ function addPath(inputPath) {
 }
 exports.addPath = addPath;
 /**
- * Gets the value of an input.  The value is also trimmed.
+ * Gets the value of an input.
+ * Unless trimWhitespace is set to false in InputOptions, the value is also trimmed.
+ * Returns an empty string if the value is not defined.
  *
  * @param     name     name of the input to get
  * @param     options  optional. See InputOptions.
@@ -7597,9 +8051,49 @@ function getInput(name, options) {
     if (options && options.required && !val) {
         throw new Error(`Input required and not supplied: ${name}`);
     }
+    if (options && options.trimWhitespace === false) {
+        return val;
+    }
     return val.trim();
 }
 exports.getInput = getInput;
+/**
+ * Gets the values of an multiline input.  Each value is also trimmed.
+ *
+ * @param     name     name of the input to get
+ * @param     options  optional. See InputOptions.
+ * @returns   string[]
+ *
+ */
+function getMultilineInput(name, options) {
+    const inputs = getInput(name, options)
+        .split('\n')
+        .filter(x => x !== '');
+    return inputs;
+}
+exports.getMultilineInput = getMultilineInput;
+/**
+ * Gets the input value of the boolean type in the YAML 1.2 "core schema" specification.
+ * Support boolean input list: `true | True | TRUE | false | False | FALSE` .
+ * The return value is also in boolean type.
+ * ref: https://yaml.org/spec/1.2/spec.html#id2804923
+ *
+ * @param     name     name of the input to get
+ * @param     options  optional. See InputOptions.
+ * @returns   boolean
+ */
+function getBooleanInput(name, options) {
+    const trueValue = ['true', 'True', 'TRUE'];
+    const falseValue = ['false', 'False', 'FALSE'];
+    const val = getInput(name, options);
+    if (trueValue.includes(val))
+        return true;
+    if (falseValue.includes(val))
+        return false;
+    throw new TypeError(`Input does not meet YAML 1.2 "Core Schema" specification: ${name}\n` +
+        `Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
+}
+exports.getBooleanInput = getBooleanInput;
 /**
  * Sets the value of an output.
  *
@@ -7608,6 +8102,7 @@ exports.getInput = getInput;
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function setOutput(name, value) {
+    process.stdout.write(os.EOL);
     command_1.issueCommand('set-output', { name }, value);
 }
 exports.setOutput = setOutput;
@@ -7808,6 +8303,8 @@ function setup(env) {
 	function createDebug(namespace) {
 		let prevTime;
 		let enableOverride = null;
+		let namespacesCache;
+		let enabledCache;
 
 		function debug(...args) {
 			// Disabled?
@@ -7868,7 +8365,17 @@ function setup(env) {
 		Object.defineProperty(debug, 'enabled', {
 			enumerable: true,
 			configurable: false,
-			get: () => enableOverride === null ? createDebug.enabled(namespace) : enableOverride,
+			get: () => {
+				if (enableOverride !== null) {
+					return enableOverride;
+				}
+				if (namespacesCache !== createDebug.namespaces) {
+					namespacesCache = createDebug.namespaces;
+					enabledCache = createDebug.enabled(namespace);
+				}
+
+				return enabledCache;
+			},
 			set: v => {
 				enableOverride = v;
 			}
@@ -7897,6 +8404,7 @@ function setup(env) {
 	*/
 	function enable(namespaces) {
 		createDebug.save(namespaces);
+		createDebug.namespaces = namespaces;
 
 		createDebug.names = [];
 		createDebug.skips = [];
@@ -9409,52 +9917,6 @@ exports.Deprecation = Deprecation;
 
 /***/ }),
 
-/***/ 701:
-/***/ (function(__unusedmodule, exports) {
-
-"use strict";
-
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
-/*!
- * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
- *
- * Copyright (c) 2014-2017, Jon Schlinkert.
- * Released under the MIT License.
- */
-
-function isObject(o) {
-  return Object.prototype.toString.call(o) === '[object Object]';
-}
-
-function isPlainObject(o) {
-  var ctor,prot;
-
-  if (isObject(o) === false) return false;
-
-  // If has modified constructor
-  ctor = o.constructor;
-  if (ctor === undefined) return true;
-
-  // If has modified prototype
-  prot = ctor.prototype;
-  if (isObject(prot) === false) return false;
-
-  // If constructor does not have an Object-specific method
-  if (prot.hasOwnProperty('isPrototypeOf') === false) {
-    return false;
-  }
-
-  // Most likely a plain Object
-  return true;
-}
-
-exports.isPlainObject = isPlainObject;
-
-
-/***/ }),
-
 /***/ 715:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -9512,17 +9974,19 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 
 var endpoint = __webpack_require__(385);
 var universalUserAgent = __webpack_require__(796);
-var isPlainObject = __webpack_require__(701);
+var isPlainObject = __webpack_require__(356);
 var nodeFetch = _interopDefault(__webpack_require__(454));
 var requestError = __webpack_require__(463);
 
-const VERSION = "5.4.14";
+const VERSION = "5.6.0";
 
 function getBufferResponse(response) {
   return response.arrayBuffer();
 }
 
 function fetchWrapper(requestOptions) {
+  const log = requestOptions.request && requestOptions.request.log ? requestOptions.request.log : console;
+
   if (isPlainObject.isPlainObject(requestOptions.body) || Array.isArray(requestOptions.body)) {
     requestOptions.body = JSON.stringify(requestOptions.body);
   }
@@ -9536,12 +10000,20 @@ function fetchWrapper(requestOptions) {
     body: requestOptions.body,
     headers: requestOptions.headers,
     redirect: requestOptions.redirect
-  }, requestOptions.request)).then(response => {
+  }, // `requestOptions.request.agent` type is incompatible
+  // see https://github.com/octokit/types.ts/pull/264
+  requestOptions.request)).then(async response => {
     url = response.url;
     status = response.status;
 
     for (const keyAndValue of response.headers) {
       headers[keyAndValue[0]] = keyAndValue[1];
+    }
+
+    if ("deprecation" in headers) {
+      const matches = headers.link && headers.link.match(/<([^>]+)>; rel="deprecation"/);
+      const deprecationLink = matches && matches.pop();
+      log.warn(`[@octokit/request] "${requestOptions.method} ${requestOptions.url}" is deprecated. It is scheduled to be removed on ${headers.sunset}${deprecationLink ? `. See ${deprecationLink}` : ""}`);
     }
 
     if (status === 204 || status === 205) {
@@ -9555,49 +10027,43 @@ function fetchWrapper(requestOptions) {
       }
 
       throw new requestError.RequestError(response.statusText, status, {
-        headers,
+        response: {
+          url,
+          status,
+          headers,
+          data: undefined
+        },
         request: requestOptions
       });
     }
 
     if (status === 304) {
       throw new requestError.RequestError("Not modified", status, {
-        headers,
+        response: {
+          url,
+          status,
+          headers,
+          data: await getResponseData(response)
+        },
         request: requestOptions
       });
     }
 
     if (status >= 400) {
-      return response.text().then(message => {
-        const error = new requestError.RequestError(message, status, {
+      const data = await getResponseData(response);
+      const error = new requestError.RequestError(toErrorMessage(data), status, {
+        response: {
+          url,
+          status,
           headers,
-          request: requestOptions
-        });
-
-        try {
-          let responseBody = JSON.parse(error.message);
-          Object.assign(error, responseBody);
-          let errors = responseBody.errors; // Assumption `errors` would always be in Array format
-
-          error.message = error.message + ": " + errors.map(JSON.stringify).join(", ");
-        } catch (e) {// ignore, see octokit/rest.js#684
-        }
-
-        throw error;
+          data
+        },
+        request: requestOptions
       });
+      throw error;
     }
 
-    const contentType = response.headers.get("content-type");
-
-    if (/application\/json/.test(contentType)) {
-      return response.json();
-    }
-
-    if (!contentType || /^text\/|charset=utf-8$/.test(contentType)) {
-      return response.text();
-    }
-
-    return getBufferResponse(response);
+    return getResponseData(response);
   }).then(data => {
     return {
       status,
@@ -9606,15 +10072,40 @@ function fetchWrapper(requestOptions) {
       data
     };
   }).catch(error => {
-    if (error instanceof requestError.RequestError) {
-      throw error;
-    }
-
+    if (error instanceof requestError.RequestError) throw error;
     throw new requestError.RequestError(error.message, 500, {
-      headers,
       request: requestOptions
     });
   });
+}
+
+async function getResponseData(response) {
+  const contentType = response.headers.get("content-type");
+
+  if (/application\/json/.test(contentType)) {
+    return response.json();
+  }
+
+  if (!contentType || /^text\/|charset=utf-8$/.test(contentType)) {
+    return response.text();
+  }
+
+  return getBufferResponse(response);
+}
+
+function toErrorMessage(data) {
+  if (typeof data === "string") return data; // istanbul ignore else - just in case
+
+  if ("message" in data) {
+    if (Array.isArray(data.errors)) {
+      return `${data.message}: ${data.errors.map(JSON.stringify).join(", ")}`;
+    }
+
+    return data.message;
+  } // istanbul ignore next - just in case
+
+
+  return `Unknown error: ${JSON.stringify(data)}`;
 }
 
 function withDefaults(oldEndpoint, newDefaults) {
@@ -10609,7 +11100,7 @@ const Endpoints = {
         previews: ["squirrel-girl"]
       }
     }, {
-      deprecated: "octokit.reactions.deleteLegacy() is deprecated, see https://docs.github.com/rest/reference/reactions/#delete-a-reaction-legacy"
+      deprecated: "octokit.rest.reactions.deleteLegacy() is deprecated, see https://docs.github.com/rest/reference/reactions/#delete-a-reaction-legacy"
     }],
     listForCommitComment: ["GET /repos/{owner}/{repo}/comments/{comment_id}/reactions", {
       mediaType: {
@@ -10676,7 +11167,7 @@ const Endpoints = {
     createDeploymentStatus: ["POST /repos/{owner}/{repo}/deployments/{deployment_id}/statuses"],
     createDispatchEvent: ["POST /repos/{owner}/{repo}/dispatches"],
     createForAuthenticatedUser: ["POST /user/repos"],
-    createFork: ["POST /repos/{owner}/{repo}/forks{?org,organization}"],
+    createFork: ["POST /repos/{owner}/{repo}/forks"],
     createInOrg: ["POST /orgs/{org}/repos"],
     createOrUpdateEnvironment: ["PUT /repos/{owner}/{repo}/environments/{environment_name}"],
     createOrUpdateFileContents: ["PUT /repos/{owner}/{repo}/contents/{path}"],
@@ -10986,7 +11477,7 @@ const Endpoints = {
   }
 };
 
-const VERSION = "4.15.0";
+const VERSION = "4.15.1";
 
 function endpointsToMethods(octokit, endpointsMap) {
   const newMethods = {};
@@ -12343,7 +12834,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 var request = __webpack_require__(753);
 var universalUserAgent = __webpack_require__(796);
 
-const VERSION = "4.6.1";
+const VERSION = "4.6.4";
 
 class GraphqlError extends Error {
   constructor(request, response) {
